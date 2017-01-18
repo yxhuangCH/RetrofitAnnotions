@@ -35,11 +35,13 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
     }
     final Type responseType = Utils.getCallResponseType(returnType);
     return new CallAdapter<Object, Call<?>>() {
-      @Override public Type responseType() {
+      @Override
+      public Type responseType() {
         return responseType;
       }
 
-      @Override public Call<Object> adapt(Call<Object> call) {
+      @Override
+      public Call<Object> adapt(Call<Object> call) {
         return new ExecutorCallbackCall<>(callbackExecutor, call);
       }
     };
@@ -51,10 +53,11 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
 
     ExecutorCallbackCall(Executor callbackExecutor, Call<T> delegate) {
       this.callbackExecutor = callbackExecutor;
-      this.delegate = delegate;
+      this.delegate = delegate;  //
     }
 
-    @Override public void enqueue(final Callback<T> callback) {
+    @Override
+    public void enqueue(final Callback<T> callback) {
       if (callback == null) throw new NullPointerException("callback == null");
 
       delegate.enqueue(new Callback<T>() {
@@ -71,9 +74,11 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
           });
         }
 
-        @Override public void onFailure(Call<T> call, final Throwable t) {
+        @Override
+        public void onFailure(Call<T> call, final Throwable t) {
           callbackExecutor.execute(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
               callback.onFailure(ExecutorCallbackCall.this, t);
             }
           });
@@ -81,28 +86,34 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
       });
     }
 
-    @Override public boolean isExecuted() {
+    @Override
+    public boolean isExecuted() {
       return delegate.isExecuted();
     }
 
-    @Override public Response<T> execute() throws IOException {
+    @Override
+    public Response<T> execute() throws IOException {
       return delegate.execute();
     }
 
-    @Override public void cancel() {
+    @Override
+    public void cancel() {
       delegate.cancel();
     }
 
-    @Override public boolean isCanceled() {
+    @Override
+    public boolean isCanceled() {
       return delegate.isCanceled();
     }
 
     @SuppressWarnings("CloneDoesntCallSuperClone") // Performing deep clone.
-    @Override public Call<T> clone() {
+    @Override
+    public Call<T> clone() {
       return new ExecutorCallbackCall<>(callbackExecutor, delegate.clone());
     }
 
-    @Override public Request request() {
+    @Override
+    public Request request() {
       return delegate.request();
     }
   }

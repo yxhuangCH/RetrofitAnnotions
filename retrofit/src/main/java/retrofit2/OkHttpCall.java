@@ -41,11 +41,13 @@ final class OkHttpCall<T> implements Call<T> {
   }
 
   @SuppressWarnings("CloneDoesntCallSuperClone") // We are a final type & this saves clearing state.
-  @Override public OkHttpCall<T> clone() {
+  @Override
+  public OkHttpCall<T> clone() {
     return new OkHttpCall<>(serviceMethod, args);
   }
 
-  @Override public synchronized Request request() {
+  @Override
+  public synchronized Request request() {
     okhttp3.Call call = rawCall;
     if (call != null) {
       return call.request();
@@ -68,7 +70,9 @@ final class OkHttpCall<T> implements Call<T> {
     }
   }
 
-  @Override public void enqueue(final Callback<T> callback) {
+  // 异步执行
+  @Override
+  public void enqueue(final Callback<T> callback) {
     if (callback == null) throw new NullPointerException("callback == null");
 
     okhttp3.Call call;
@@ -98,9 +102,10 @@ final class OkHttpCall<T> implements Call<T> {
       call.cancel();
     }
 
+    // okhttp3.Call
     call.enqueue(new okhttp3.Callback() {
-      @Override public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse)
-          throws IOException {
+      @Override
+      public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) throws IOException {
         Response<T> response;
         try {
           response = parseResponse(rawResponse);
@@ -111,7 +116,8 @@ final class OkHttpCall<T> implements Call<T> {
         callSuccess(response);
       }
 
-      @Override public void onFailure(okhttp3.Call call, IOException e) {
+      @Override
+      public void onFailure(okhttp3.Call call, IOException e) {
         try {
           callback.onFailure(OkHttpCall.this, e);
         } catch (Throwable t) {
@@ -137,11 +143,14 @@ final class OkHttpCall<T> implements Call<T> {
     });
   }
 
-  @Override public synchronized boolean isExecuted() {
+  @Override
+  public synchronized boolean isExecuted() {
     return executed;
   }
 
-  @Override public Response<T> execute() throws IOException {
+  // 同步执行
+  @Override
+  public Response<T> execute() throws IOException {
     okhttp3.Call call;
 
     synchronized (this) {
@@ -171,6 +180,7 @@ final class OkHttpCall<T> implements Call<T> {
       call.cancel();
     }
 
+    // 发起请求，并解析返回结果
     return parseResponse(call.execute());
   }
 
@@ -209,6 +219,7 @@ final class OkHttpCall<T> implements Call<T> {
 
     ExceptionCatchingRequestBody catchingBody = new ExceptionCatchingRequestBody(rawBody);
     try {
+      // T 是想要的结果，例如  Call<List<Repo>> listRepos(@Path("user") String user); 中的 List<Repo>
       T body = serviceMethod.toResponse(catchingBody);
       return Response.success(body, rawResponse);
     } catch (RuntimeException e) {
@@ -231,7 +242,8 @@ final class OkHttpCall<T> implements Call<T> {
     }
   }
 
-  @Override public boolean isCanceled() {
+  @Override
+  public boolean isCanceled() {
     if (canceled) {
       return true;
     }
@@ -249,15 +261,18 @@ final class OkHttpCall<T> implements Call<T> {
       this.contentLength = contentLength;
     }
 
-    @Override public MediaType contentType() {
+    @Override
+    public MediaType contentType() {
       return contentType;
     }
 
-    @Override public long contentLength() {
+    @Override
+    public long contentLength() {
       return contentLength;
     }
 
-    @Override public BufferedSource source() {
+    @Override
+    public BufferedSource source() {
       throw new IllegalStateException("Cannot read raw response body of a converted body.");
     }
   }
@@ -270,17 +285,21 @@ final class OkHttpCall<T> implements Call<T> {
       this.delegate = delegate;
     }
 
-    @Override public MediaType contentType() {
+    @Override
+    public MediaType contentType() {
       return delegate.contentType();
     }
 
-    @Override public long contentLength() {
+    @Override
+    public long contentLength() {
       return delegate.contentLength();
     }
 
-    @Override public BufferedSource source() {
+    @Override
+    public BufferedSource source() {
       return Okio.buffer(new ForwardingSource(delegate.source()) {
-        @Override public long read(Buffer sink, long byteCount) throws IOException {
+        @Override
+        public long read(Buffer sink, long byteCount) throws IOException {
           try {
             return super.read(sink, byteCount);
           } catch (IOException e) {
@@ -291,7 +310,8 @@ final class OkHttpCall<T> implements Call<T> {
       });
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
       delegate.close();
     }
 

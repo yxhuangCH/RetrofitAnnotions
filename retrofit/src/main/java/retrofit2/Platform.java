@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 
+// 判断使用的平台
 class Platform {
   private static final Platform PLATFORM = findPlatform();
 
@@ -69,11 +70,13 @@ class Platform {
 
   @IgnoreJRERequirement // Only classloaded and used on Java 8.
   static class Java8 extends Platform {
-    @Override boolean isDefaultMethod(Method method) {
+    @Override
+    boolean isDefaultMethod(Method method) {
       return method.isDefault();
     }
 
-    @Override Object invokeDefaultMethod(Method method, Class<?> declaringClass, Object object,
+    @Override
+    Object invokeDefaultMethod(Method method, Class<?> declaringClass, Object object,
         Object... args) throws Throwable {
       // Because the service interface might not be public, we need to use a MethodHandle lookup
       // that ignores the visibility of the declaringClass.
@@ -87,18 +90,21 @@ class Platform {
   }
 
   static class Android extends Platform {
-    @Override public Executor defaultCallbackExecutor() {
+    @Override
+    public Executor defaultCallbackExecutor() {
       return new MainThreadExecutor();
     }
 
-    @Override CallAdapter.Factory defaultCallAdapterFactory(Executor callbackExecutor) {
+    @Override
+    CallAdapter.Factory defaultCallAdapterFactory(Executor callbackExecutor) {
       return new ExecutorCallAdapterFactory(callbackExecutor);
     }
 
     static class MainThreadExecutor implements Executor {
       private final Handler handler = new Handler(Looper.getMainLooper());
 
-      @Override public void execute(Runnable r) {
+      @Override
+      public void execute(Runnable r) {
         handler.post(r);
       }
     }

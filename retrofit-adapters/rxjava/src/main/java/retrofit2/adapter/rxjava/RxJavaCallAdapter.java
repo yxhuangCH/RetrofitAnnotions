@@ -41,11 +41,13 @@ final class RxJavaCallAdapter<R> implements CallAdapter<R, Object> {
     this.isCompletable = isCompletable;
   }
 
-  @Override public Type responseType() {
+  @Override
+  public Type responseType() {
     return responseType;
   }
 
-  @Override public Object adapt(Call<R> call) {
+  @Override
+  public Object adapt(Call<R> call) {
     OnSubscribe<Response<R>> callFunc = new CallOnSubscribe<>(call);
 
     OnSubscribe<?> func;

@@ -129,22 +129,29 @@ public final class Retrofit {
     if (validateEagerly) {
       eagerlyValidateMethods(service);
     }
+    // 动态代理, 返回一个 Service 代理对象
     return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
         new InvocationHandler() {
           private final Platform platform = Platform.get();
 
-          @Override public Object invoke(Object proxy, Method method, Object... args)
-              throws Throwable {
+          @Override
+          public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
             // If the method is a method from Object then defer to normal invocation.
             if (method.getDeclaringClass() == Object.class) {
               return method.invoke(this, args);
             }
+
             if (platform.isDefaultMethod(method)) {
               return platform.invokeDefaultMethod(method, service, proxy, args);
             }
+
+            // ServiceMethod 调用接口的方法，转变成一个 Http Call
             ServiceMethod<Object, Object> serviceMethod =
                 (ServiceMethod<Object, Object>) loadServiceMethod(method);
+
             OkHttpCall<Object> okHttpCall = new OkHttpCall<>(serviceMethod, args);
+            // serviceMethod.callAdapter 返回是 ExecutorCallAdapterFactory&ExecutorCallbackCall
+            // 发起请求，并解析服务器返回的结果
             return serviceMethod.callAdapter.adapt(okHttpCall);
           }
         });
@@ -217,6 +224,7 @@ public final class Retrofit {
 
     int start = adapterFactories.indexOf(skipPast) + 1;
     for (int i = start, count = adapterFactories.size(); i < count; i++) {
+      // （返回是 ExecutorCallAdapterFractory.）
       CallAdapter<?, ?> adapter = adapterFactories.get(i).get(returnType, annotations, this);
       if (adapter != null) {
         return adapter;
@@ -568,11 +576,16 @@ public final class Retrofit {
 
       Executor callbackExecutor = this.callbackExecutor;
       if (callbackExecutor == null) {
+        // 根据 platform, 选择不同的 CallbackExecutor
+        // 这里是 platform 是 Android , 返回的是 MainThreadExecutor;
+        //  MainThreadExecutor 类，内部是通过 Handler 将 Runnable post 回主线程执行
         callbackExecutor = platform.defaultCallbackExecutor();
       }
 
       // Make a defensive copy of the adapters and add the default Call adapter.
+      // adaperFactories 是用来在存放 CallAdapterFactory, 例如使用 RxJavaCallAdapterFactory， 也会添加进来
       List<CallAdapter.Factory> adapterFactories = new ArrayList<>(this.adapterFactories);
+      //defaultCallAdapterFactory 是 ExecutorCallAdapterFactory，其中 MainThreadExcutor 作为参数构造
       adapterFactories.add(platform.defaultCallAdapterFactory(callbackExecutor));
 
       // Make a defensive copy of the converters.

@@ -39,12 +39,14 @@ public interface Call<T> extends Cloneable {
    * @throws RuntimeException (and subclasses) if an unexpected error occurs creating the request
    * or decoding the response.
    */
+  // 同步请求
   Response<T> execute() throws IOException;
 
   /**
    * Asynchronously send the request and notify {@code callback} of its response or if an error
    * occurred talking to the server, creating the request, or processing the response.
    */
+  // 异步请求
   void enqueue(Callback<T> callback);
 
   /**

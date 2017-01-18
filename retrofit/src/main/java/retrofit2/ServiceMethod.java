@@ -157,6 +157,8 @@ final class ServiceMethod<R, T> {
     }
 
     public ServiceMethod build() {
+      // 创建 CallAdapter, 其实是返回 Retrofit 中的 callAdapter,
+      // ExecutorCallAdapterFactory$ExecutorCallbackCall
       callAdapter = createCallAdapter();
       responseType = callAdapter.responseType();
       if (responseType == Response.class || responseType == okhttp3.Response.class) {
@@ -164,9 +166,15 @@ final class ServiceMethod<R, T> {
             + Utils.getRawType(responseType).getName()
             + "' is not a valid response body type. Did you mean ResponseBody?");
       }
+      // 返回 Retrofit.responseBodyConverter(...)， 其实是从 converterFactories 中取出 ResponseBodyConverter
+      //  例如，如果配置了 GsonResponseBodyConverter, 则返回
       responseConverter = createResponseConverter();
 
       for (Annotation annotation : methodAnnotations) {
+        // 解析注解方法，
+        //@GET("group/{id}/users")
+        //Call<List<User>> groupList(@Path("id") int groupId, @Query("sort") String sort);
+        // 中的 @GET("group/{id}/users")
         parseMethodAnnotation(annotation);
       }
 
@@ -736,6 +744,7 @@ final class ServiceMethod<R, T> {
    * in the URI, it will only show up once in the set.
    */
   static Set<String> parsePathParameters(String path) {
+    // 使用正则配对
     Matcher m = PARAM_URL_REGEX.matcher(path);
     Set<String> patterns = new LinkedHashSet<>();
     while (m.find()) {
