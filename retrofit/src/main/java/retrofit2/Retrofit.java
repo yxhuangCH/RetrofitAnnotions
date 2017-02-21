@@ -137,10 +137,12 @@ public final class Retrofit {
           @Override
           public Object invoke(Object proxy, Method method, Object... args) throws Throwable {
             // If the method is a method from Object then defer to normal invocation.
+            // 如果该方法只是对象的普通方法，这直接调用
             if (method.getDeclaringClass() == Object.class) {
               return method.invoke(this, args);
             }
 
+            // 默认是 false
             if (platform.isDefaultMethod(method)) {
               return platform.invokeDefaultMethod(method, service, proxy, args);
             }
@@ -150,7 +152,8 @@ public final class Retrofit {
                 (ServiceMethod<Object, Object>) loadServiceMethod(method);
 
             OkHttpCall<Object> okHttpCall = new OkHttpCall<>(serviceMethod, args);
-            // serviceMethod.callAdapter 返回是 ExecutorCallAdapterFactory&ExecutorCallbackCall
+            // serviceMethod.callAdapter 返回是 默认ExecutorCallAdapterFactory&ExecutorCallbackCall
+            // 如果添加了 RxJavaCallAdapter, 返回的是 RxJavaCallAdapter
             // 发起请求，并解析服务器返回的结果
             return serviceMethod.callAdapter.adapt(okHttpCall);
           }

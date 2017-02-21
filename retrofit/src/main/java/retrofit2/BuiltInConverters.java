@@ -58,7 +58,8 @@ final class BuiltInConverters extends Converter.Factory {
   static final class RequestBodyConverter implements Converter<RequestBody, RequestBody> {
     static final RequestBodyConverter INSTANCE = new RequestBodyConverter();
 
-    @Override public RequestBody convert(RequestBody value) throws IOException {
+    @Override
+    public RequestBody convert(RequestBody value) throws IOException {
       return value;
     }
   }
@@ -67,7 +68,8 @@ final class BuiltInConverters extends Converter.Factory {
       implements Converter<ResponseBody, ResponseBody> {
     static final StreamingResponseBodyConverter INSTANCE = new StreamingResponseBodyConverter();
 
-    @Override public ResponseBody convert(ResponseBody value) throws IOException {
+    @Override
+    public ResponseBody convert(ResponseBody value) throws IOException {
       return value;
     }
   }
@@ -76,7 +78,8 @@ final class BuiltInConverters extends Converter.Factory {
       implements Converter<ResponseBody, ResponseBody> {
     static final BufferingResponseBodyConverter INSTANCE = new BufferingResponseBodyConverter();
 
-    @Override public ResponseBody convert(ResponseBody value) throws IOException {
+    @Override 
+    public ResponseBody convert(ResponseBody value) throws IOException {
       try {
         // Buffer the entire body to avoid future I/O.
         return Utils.buffer(value);
@@ -89,7 +92,8 @@ final class BuiltInConverters extends Converter.Factory {
   static final class ToStringConverter implements Converter<Object, String> {
     static final ToStringConverter INSTANCE = new ToStringConverter();
 
-    @Override public String convert(Object value) {
+    @Override 
+    public String convert(Object value) {
       return value.toString();
     }
   }

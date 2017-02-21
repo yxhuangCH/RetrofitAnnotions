@@ -63,8 +63,7 @@ class Platform {
     return false;
   }
 
-  Object invokeDefaultMethod(Method method, Class<?> declaringClass, Object object, Object... args)
-      throws Throwable {
+  Object invokeDefaultMethod(Method method, Class<?> declaringClass, Object object, Object... args) throws Throwable {
     throw new UnsupportedOperationException();
   }
 
