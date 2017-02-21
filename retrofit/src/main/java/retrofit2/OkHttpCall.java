@@ -181,6 +181,7 @@ final class OkHttpCall<T> implements Call<T> {
     }
 
     // 发起请求，并解析返回结果
+    // 这里的 call 是 OkHttp 中的 RealCall
     return parseResponse(call.execute());
   }
 
